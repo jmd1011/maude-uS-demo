@@ -1,0 +1,42 @@
+mod SERVICE is
+	inc CONFIGURATION .
+	inc QID .
+
+	sorts Key Value .
+	subsorts Qid < Key Value .
+
+    sorts Param ParamSet .
+    subsort Param < ParamSet .
+
+    op emptyVal : -> Value [ctor] .
+    op none : -> Param [ctor] .
+    op {_,_} : Key Value -> Param [ctor object] .
+
+    op params :_ : ParamSet -> Attribute [ctor gather (&)] .
+    op __ : ParamSet ParamSet -> ParamSet [ctor assoc comm id: none] .
+
+    op get delete : -> Msg . ***get/delete errythang
+	op get_ post_ delete_ : Key -> Msg . ***Example: get K
+    op put__ : Key ParamSet -> Msg .
+
+    op send_:_ : Oid Msg -> Msg . ***Example: send A : (get K)
+endm
+
+mod GAME-SERVICE is
+	ex SERVICE .
+
+    sorts GAME GAMESet .
+    subsorts Oid < GAME < GAMESet .
+
+    op empty : -> GAMESet [ctor object] .
+    op _;_ : GAMESet GAMESet -> GAMESet [ctor assoc comm id: empty] .
+
+    op Game : -> Cid [ctor] .
+    op name :_ : Qid -> Attribute [ctor gather (&)] .
+    
+    var S : Oid .
+
+    rl [PUT] :
+        < S : Service
+
+endm
