@@ -1,0 +1,102 @@
+---load full-maude26.maude .
+load real-time-maude .
+
+(tomod NEW-CONFIG is
+	op none : -> EmptyConfiguration [ctor] .
+endtom)
+
+(omod IDENTIFIERS is
+	pr QID .
+	pr NAT .
+	pr STRING .
+	pr CONFIGURATION .
+
+	sorts YAMLid APIid MODELid PRODid Version SwaggerVersion.
+	subsorts Oid < YAMLid APIid MODELid PRODid .	
+	subsort SwaggerVersion < Version .
+
+	sorts APIidSet MODELidSet PRODidSet.
+	subsort APIid   < APIidSet .
+	subsort MODELid < MODELidSet .
+	subsort PRODid  < PRODidSet .
+
+	sorts BasePath ResourcePath .
+	subsort String < BasePath .
+
+	op emptyProds  : -> PRODidSet  [ctor object] . ***should this be object?
+	op _;_ : PRODidSet PRODidSet -> PRODidSet  [ctor assoc  id: emptyProds] .
+	
+	op _._ : Nat Nat Nat -> Version [ctor assoc] . ***should this be assoc? maybe should be _._._ instead -- need to look at more yml files
+	op "_._" : Nat Nat -> SwaggerVersion [ctor] .
+
+	op apiVersion':_ : Version -> Version .
+
+	class YAML | version : Version, swaggerVersion : SwaggerVersion, basePath : BasePath, resourcePath : ResourcePath, produces : PRODidSet, apis : APIidSet, models : MODELidSet .
+endom)
+
+(omod APIS is 
+	pr IDENTIFIERS .
+	
+	sorts PATHid OPid AUTHid PARAMid RMid .
+	subsorts Oid < PATHid OPid AUTHid PARAMid RMid .
+
+	sorts OPidSet .
+	subsort OPid < OPidSet .
+
+	op noOp : -> OPidSet [ctor] .
+
+	op _;_ : OPidSet OPidSet -> OPidSet [ditto id: noOp] .
+
+	class Api | path : PATHid, operations : OPidSet .
+endom)
+
+(omod OPERATIONS is 
+	pr APIS .
+
+	sorts METHODid SUMMARYid NOTESid TYPEid NICKid AUTHid PARAMid RMid .
+	subsorts Oid < METHODid SUMMARYid NOTESid TYPEid NICKid AUTHid PARAMid RMid .
+
+	sorts AUTHidSet PARAMidSet RMidSet .
+
+	subsort AUTHid < AUTHidSet .
+	subsort PARAMid < PARAMidSet .
+	subsort RMid < RMidSet .
+
+	***Not sure if emptyProds and emptyRMs should be allowed
+	op emptyAuths  : -> AUTHidSet  [ctor object] .
+	op emptyParams : -> PARAMidSet [ctor object] .
+	op emptyRMs    : -> RMidSet    [ctor object] .
+
+	op _;_ : AUTHidSet AUTHidSet   -> AUTHidSet  [ditto id: emptyAuths] .
+	op _;_ : PARAMidSet PARAMidSet -> PARAMidSet [ditto id: emptyParams] .
+	op _;_ : RMidSet RMidSet       -> RMidSet    [ditto id: emptyRMs] .
+
+	sorts Method Summary Notes Nickname .
+	subsorts String < Method Summary Notes Nickname .
+	
+	class Type | value : MODELid .
+	class Operation | method : Method, summary : Summary, notes : Notes, type : Type, nickname : Nickname, produces : PRODidSet, auths : AUTHidSet, params : PARAMidSet, responses : RMidSet .
+
+endom)
+
+(omod PARAMETERS is
+	pr OPERATIONS .
+
+	sorts Name Description Type1 ParamType .
+	subsorts String < Name Description Type1 ParamType .
+
+	class Parameter | name : Name, description : Description, required : Bool, allowMultiple : Bool, type : Type1, paramType : ParamType .
+endom)
+
+(omod RESPONSES is 
+	pr OPERATIONS .
+	class Response | code : Nat, message : String .
+endom)
+
+mod YAML is
+	ex CONFIGURATION .
+	sort Aid .
+
+	op Api : Aid -> Api [ctor object] .
+
+endm
