@@ -8,6 +8,15 @@ mod SERVICE is
     sorts Param ParamSet .
     subsort Param < ParamSet .
 
+    sorts GAME GAMESet .
+    subsorts Oid < GAME < GAMESet .
+
+    op empty : -> GAMESet [ctor object] .
+    op _;_ : GAMESet GAMESet -> GAMESet [ctor assoc comm id: empty] .
+
+    op Game : -> Cid [ctor] .
+    op name :_ : Qid -> Attribute [ctor gather (&)] .
+
     op emptyVal : -> Value [ctor] .
     op none : -> Param [ctor] .
     op {_,_} : Key Value -> Param [ctor object] .
@@ -22,21 +31,22 @@ mod SERVICE is
     op send_:_ : Oid Msg -> Msg . ***Example: send A : (get K)
 endm
 
-mod GAME-SERVICE is
+mod GAME-SERVICE is ---service A
 	ex SERVICE .
-
-    sorts GAME GAMESet .
-    subsorts Oid < GAME < GAMESet .
-
-    op empty : -> GAMESet [ctor object] .
-    op _;_ : GAMESet GAMESet -> GAMESet [ctor assoc comm id: empty] .
-
-    op Game : -> Cid [ctor] .
-    op name :_ : Qid -> Attribute [ctor gather (&)] .
     
     var S : Oid .
 
-    rl [PUT] :
-        < S : Service
+    rl [GET] :
+        S K => S send(K, V) .
 
 endm
+
+mod SERVICE-B is 
+    ex SERVICE .
+
+    rl [RECEIVE] :
+        B send(K, V) => B' . ***update the client
+
+
+Service A -- has a game DB, can read and write from/to DB
+Service B -- gets request from user, sends message to Service A to perform request
