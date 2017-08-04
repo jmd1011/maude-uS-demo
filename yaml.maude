@@ -1,0 +1,87 @@
+mod REST is
+	inc CONFIGURATION .
+	inc QID .
+
+	sorts Param ParamSet .
+	subsort Param < ParamSet .
+
+	sorts Key Value .
+	subsorts Qid < Key Value .
+
+	sorts AuthToken AuthTokenSet .
+	subsort Qid < AuthToken < AuthTokenSet .
+
+	op Service : -> Cid [ctor] .
+	op emptyVal : -> Value [ctor] .
+	op none : -> Param [ctor] .
+	op {_,_} : Key Value -> Param [ctor object] .
+
+	op params :_ : ParamSet -> Attribute [ctor gather (&)] .
+	op __ : ParamSet ParamSet -> ParamSet [ctor assoc comm id: none] .
+	op _in_ : Key ParamSet -> Bool .
+
+	op auths :_ : AuthTokenSet -> Attribute [ctor gather (&)] .
+	op none : -> AuthToken .
+	op __ : AuthTokenSet AuthTokenSet -> AuthTokenSet [ctor assoc comm id: none] .
+	op _in_ : AuthTokenSet AuthTokenSet -> Bool .
+
+	*** REQUESTS (rls) -- async
+	op get_from_with_              : Key Oid AuthTokenSet -> Msg .
+	ops put_to_with_ post_to_with_ : ParamSet Oid AuthTokenSet -> Msg .
+	op delete_from_with_           : Key Oid AuthTokenSet -> Msg .
+
+	*** IMPLEMENTATIONS (eqs)
+	op get_from_ : Key ParamSet -> Value .
+	op rep_with_ : ParamSet ParamSet -> ParamSet .
+	op delete_from_ : Key ParamSet -> ParamSet .
+
+	vars K K'        : Key .
+	vars V V'        : Value .
+	vars P P'        : Param .
+	vars PS PS' PS'' : ParamSet .
+	vars S S'        : Oid .
+	var  AT AT'		 : AuthToken .
+	vars ATS ATS'    : AuthTokenSet .
+
+	eq K in PS {K, V} PS' = true .
+	eq K in PS = false [owise] .
+
+	eq ATS in ATS ATS' = true .
+	eq ATS in ATS' = false [owise] .
+
+	eq get K from {K, V} PS = V .
+	eq get K from none = emptyVal [owise] .
+	
+	eq rep {K, V} PS with {K, V'} PS'       = rep {K, V'} PS with PS' .
+	eq rep {K, V} PS with {K', V'} PS'      = rep {K, V} {K', V'} PS with PS' .
+	eq rep {K, V} PS with {K, emptyVal} PS' = rep PS with PS' .
+	eq rep none with PS = PS .
+	eq rep PS with none = PS .
+
+	eq delete K from {K, V} PS = PS .
+	eq delete K from PS = PS [owise] .
+
+	crl [PUT] :
+		< S : Service | params : PS , auths : ATS >
+		(post PS' to S with ATS')
+	 =>
+	 	< S : Service | params : rep PS with PS' , auths : ATS >
+ 	 if
+ 	 	ATS in ATS' .
+
+	crl [POST] :
+		< S : Service | params : PS  , auths : ATS >
+		(put PS' to S with ATS')
+	 =>
+	 	< S : Service | params : PS' , auths : ATS >
+ 	 if
+ 	 	ATS in ATS' .
+
+ 	crl [DELETE] :
+ 		< S : Service | params : PS , auths : ATS >
+ 		(delete K from S with ATS')
+	 =>
+	 	< S : Service | params : (delete K from PS) , auths : ATS' >
+ 	 if
+ 	 	ATS in ATS' .
+endm
