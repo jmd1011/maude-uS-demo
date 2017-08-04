@@ -1,52 +1,103 @@
 mod SERVICE is
 	inc CONFIGURATION .
 	inc QID .
+  pr NAT .
 
 	sorts Key Value .
-	subsorts Qid < Key Value .
+	subsort Qid < Key .
+  subsorts Qid Msg < Value .
 
-    sorts Param ParamSet .
-    subsort Param < ParamSet .
+  sorts GAME GAMESet .
+  subsorts Oid < GAME < GAMESet .  
 
-    sorts GAME GAMESet .
-    subsorts Oid < GAME < GAMESet .
+  ops A B : -> Oid [ctor object] .
 
-    op empty : -> GAMESet [ctor object] .
-    op _;_ : GAMESet GAMESet -> GAMESet [ctor assoc comm id: empty] .
+  op empty : -> GAMESet [ctor object] .
+  op _;_ : GAMESet GAMESet -> GAMESet [ctor assoc comm id: empty] .
 
-    op Game : -> Cid [ctor] .
-    op name :_ : Qid -> Attribute [ctor gather (&)] .
+  op Service : -> Cid [ctor] .
 
-    op emptyVal : -> Value [ctor] .
-    op none : -> Param [ctor] .
-    op {_,_} : Key Value -> Param [ctor object] .
+  op Game    :     -> Cid [ctor] .
+  op id :_   : Nat -> Attribute [ctor gather (&)] .
+  op name :_ : Qid -> Attribute [ctor gather (&)] .  
 
-    op params :_ : ParamSet -> Attribute [ctor gather (&)] .
-    op __ : ParamSet ParamSet -> ParamSet [ctor assoc comm id: none] .
-
-    op get delete : -> Msg . ***get/delete errythang
-	op get_ post_ delete_ : Key -> Msg . ***Example: get K
-    op put__ : Key ParamSet -> Msg .
-
-    op send_:_ : Oid Msg -> Msg . ***Example: send A : (get K)
+  op _send_:_ : Oid Msg -> Msg . ***Example: send A : (get K)
+  op _receive_ : Oid GAME -> Msg .
+  op get_ : Nat -> Msg .
+  op put__ : Nat Qid -> Msg .
+  op post__ : Nat Qid -> Msg .
+  op delete_ : Nat -> Msg .
 endm
 
-mod GAME-SERVICE is ---service A
+mod GAME-SERVICE is ---service B
 	ex SERVICE .
-    
-    var S : Oid .
 
-    rl [GET] :
-        S K => S send(K, V) .
+  op games :_ : GAMESet -> Attribute [ctor gather(&)] .
+  op put_in_ : GAME GAMESet -> GAMESet .
+  op _in_ : GAME GAMESet -> Bool . ***based on id, NOT name
 
+  vars C C' : Configuration .
+  var GM    : GAME .
+  var GS    : GAMESet .
+  vars G G' S : Oid .
+  var I     : Nat .
+  var N N'    : Qid .
+
+  eq put GM in empty = GM .
+  eq put < G : Game | id : I , name : N > in < G' : Game | id : I , name : N' > ; GS = < G : Game | id : I , name : N > ; GS .
+  eq put GM in GS = GM ; GS .
+
+  eq GM in empty = false .
+  eq < G : Game | id : I , name : N > in < G' : Game | id : I , name : N' > ; GS = true .
+
+  rl [GET] :
+      < B : Service | games : GS ; < G : Game | id : I , name : N >
+      (S send B : get I)
+    =>
+      < B : Service | games : GS ; < G : Game | id : I , name : N >
+      S receive < G : Game | id : I , name : N > .    
+
+  rl [PUT] :
+      < B : Service | games : GS >
+      < G : Game | id : I , name : N >
+      (S send B : put G)
+    =>
+      < B : Service | games : put < G : Game | id : I , name : N > in GS > .
+
+  crl [POST] :
+      < B : Service | games : GS >
+      < G : Game | id : I , name : N >
+      (S send B : post G)
+    =>
+      < B : Service | games : put < G : Game | id : I , name : N > in GS >
+    if
+      not (GM in GS) .
+
+  rl [DELETE] :
+      < B : Service | games : GS ; < G : Game | id : I , name : N > >
+      (S send B : delete I)
+    =>
+      < B : Service | games : GS > .
 endm
 
-mod SERVICE-B is 
-    ex SERVICE .
+mod INTERFACE is ---service A
+  ex SERVICE .
+ 
+  var I : Nat .
+  var N : Qid .
+  var G : Oid .
 
-    rl [RECEIVE] :
-        B send(K, V) => B' . ***update the client
+  rl [GET] :
+    get I => (A send B : get I) .
 
+  rl [PUT] :
+    put G => (A send B : put G) .
 
-Service A -- has a game DB, can read and write from/to DB
+  rl [RECEIVE] :
+    S receive < G : Game | id : I , name : N > => N .
+endm
+
+---(
 Service B -- gets request from user, sends message to Service A to perform request
+Service A -- has a game DB, can read and write from/to DB
+)---

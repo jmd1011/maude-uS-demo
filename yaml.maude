@@ -61,7 +61,7 @@ mod REST is
 	eq delete K from {K, V} PS = PS .
 	eq delete K from PS = PS [owise] .
 
-	crl [PUT] :
+	crl [POST] :
 		< S : Service | params : PS , auths : ATS >
 		(post PS' to S with ATS')
 	 =>
@@ -69,7 +69,7 @@ mod REST is
  	 if
  	 	ATS in ATS' .
 
-	crl [POST] :
+	crl [PUT] :
 		< S : Service | params : PS  , auths : ATS >
 		(put PS' to S with ATS')
 	 =>
