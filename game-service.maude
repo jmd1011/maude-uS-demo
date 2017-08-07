@@ -10,9 +10,9 @@ mod SERVICE is
   sorts GAME GAMESet .
   subsorts Oid < GAME < GAMESet .  
 
-  ops A B : -> Oid [ctor object] .
+  ops A B : -> Oid [ctor] .
 
-  op empty : -> GAMESet [ctor object] .
+  op empty : -> GAMESet [ctor] .
   op _;_ : GAMESet GAMESet -> GAMESet [ctor assoc comm id: empty] .
 
   op Service : -> Cid [ctor] .
@@ -21,8 +21,8 @@ mod SERVICE is
   op id :_   : Nat -> Attribute [ctor gather (&)] .
   op name :_ : Qid -> Attribute [ctor gather (&)] .  
 
-  op _send_:_ : Oid Msg -> Msg . ***Example: send A : (get K)
-  op _receive_ : Oid GAME -> Msg .
+  op _send_:_ : Oid Oid Msg -> Msg . ***Example: send A : (get K)
+  op _receive_ : Oid Msg -> Msg .
   op get_ : Nat -> Msg .
   op put__ : Nat Qid -> Msg .
   op post__ : Nat Qid -> Msg .
@@ -43,38 +43,42 @@ mod GAME-SERVICE is ---service B
   var I     : Nat .
   var N N'    : Qid .
 
+  ---(
   eq put GM in empty = GM .
-  eq put < G : Game | id : I , name : N > in < G' : Game | id : I , name : N' > ; GS = < G : Game | id : I , name : N > ; GS .
+  eq put (< G : Game | id : I , name : N >) in < G' : Game | id : I , name : N' > ; GS = < G : Game | id : I , name : N > ; GS .
   eq put GM in GS = GM ; GS .
 
   eq GM in empty = false .
-  eq < G : Game | id : I , name : N > in < G' : Game | id : I , name : N' > ; GS = true .
+  eq (< G : Game | id : I , name : N >) in (< G' : Game | id : I , name : N' > ; GS) = true .
+  )---
 
   rl [GET] :
-      < B : Service | games : GS ; < G : Game | id : I , name : N >
+      < G : Game | id : I , name : N >
+      < B : Service | games : GS ; G >
       (S send B : get I)
     =>
-      < B : Service | games : GS ; < G : Game | id : I , name : N >
-      S receive < G : Game | id : I , name : N > .    
+      < B : Service | games : GS ; G >
+      S receive G .
 
   rl [PUT] :
-      < B : Service | games : GS >
       < G : Game | id : I , name : N >
+      < B : Service | games : GS >
       (S send B : put G)
     =>
-      < B : Service | games : put < G : Game | id : I , name : N > in GS > .
+      < B : Service | games : put G in GS > .
 
   crl [POST] :
-      < B : Service | games : GS >
       < G : Game | id : I , name : N >
+      < B : Service | games : GS >
       (S send B : post G)
     =>
-      < B : Service | games : put < G : Game | id : I , name : N > in GS >
+      < B : Service | games : put G in GS >
     if
       not (GM in GS) .
 
   rl [DELETE] :
-      < B : Service | games : GS ; < G : Game | id : I , name : N > >
+      < G : Game | id : I , name : N >
+      < B : Service | games : GS ; G >
       (S send B : delete I)
     =>
       < B : Service | games : GS > .
@@ -83,9 +87,9 @@ endm
 mod INTERFACE is ---service A
   ex SERVICE .
  
-  var I : Nat .
-  var N : Qid .
-  var G : Oid .
+  var I   : Nat .
+  var N   : Qid .
+  var G S : Oid .
 
   rl [GET] :
     get I => (A send B : get I) .
