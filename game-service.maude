@@ -34,7 +34,6 @@ mod GAME-SERVICE is ---service B
 
   op games :_ : GAMESet -> Attribute [ctor gather(&)] .
   op put_in_ : GAME GAMESet -> GAMESet .
-  op _in_ : GAME GAMESet -> Bool . ***based on id, NOT name
 
   vars C C' : Configuration .
   var GM    : GAME .
@@ -42,15 +41,6 @@ mod GAME-SERVICE is ---service B
   vars G G' S : Oid .
   var I     : Nat .
   var N N'    : Qid .
-
-  ---(
-  eq put GM in empty = GM .
-  eq put (< G : Game | id : I , name : N >) in < G' : Game | id : I , name : N' > ; GS = < G : Game | id : I , name : N > ; GS .
-  eq put GM in GS = GM ; GS .
-
-  eq GM in empty = false .
-  eq (< G : Game | id : I , name : N >) in (< G' : Game | id : I , name : N' > ; GS) = true .
-  )---
 
   rl [GET] :
       < G : Game | id : I , name : N >
@@ -67,14 +57,25 @@ mod GAME-SERVICE is ---service B
     =>
       < B : Service | games : put G in GS > .
 
-  crl [POST] :
+  rl [UPDATE] :
+      < G : Game | id : I , name : N >
+      < G' : Game | id : I , name : N' >
+      put G in (GS ; G')
+    =>
+      GS ; G .
+
+  rl [PUT-NEW] :
+      < G : Game | id : I , name : N >
+      put G in GS
+    =>
+      GS ; G .
+
+  rl [POST] :
       < G : Game | id : I , name : N >
       < B : Service | games : GS >
       (S send B : post G)
     =>
-      < B : Service | games : put G in GS >
-    if
-      not (GM in GS) .
+      < B : Service | games : put G in GS > .
 
   rl [DELETE] :
       < G : Game | id : I , name : N >
@@ -98,7 +99,8 @@ mod INTERFACE is ---service A
     put G => (A send B : put G) .
 
   rl [RECEIVE] :
-    S receive < G : Game | id : I , name : N > => N .
+    < G : Game | id : I , name : N >
+    S receive G => N .
 endm
 
 ---(
