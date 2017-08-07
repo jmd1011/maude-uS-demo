@@ -21,12 +21,12 @@ mod SERVICE is
   op id :_   : Nat -> Attribute [ctor gather (&)] .
   op name :_ : Qid -> Attribute [ctor gather (&)] .  
 
-  op _send_:_ : Oid Oid Msg -> Msg . ***Example: send A : (get K)
-  op _receive_ : Oid Msg -> Msg .
-  op get_ : Nat -> Msg .
-  op put__ : Nat Qid -> Msg .
-  op post__ : Nat Qid -> Msg .
-  op delete_ : Nat -> Msg .
+  op _send_#_ : Oid Oid Msg -> Msg [ctor] . ***Example: send A : (get K)
+  op _receive_ : Oid Msg -> Msg [ctor] .
+  op get_ : Nat -> Msg [ctor] .
+  op put__ : Nat Qid -> Msg [ctor] .
+  op post__ : Nat Qid -> Msg [ctor] .
+  op delete_ : Nat -> Msg [ctor] .
 endm
 
 mod GAME-SERVICE is ---service B
@@ -45,7 +45,7 @@ mod GAME-SERVICE is ---service B
   rl [GET] :
       < G : Game | id : I , name : N >
       < B : Service | games : GS ; G >
-      (S send B : get I)
+      (S send B # get I)
     =>
       < B : Service | games : GS ; G >
       S receive G .
@@ -53,7 +53,7 @@ mod GAME-SERVICE is ---service B
   rl [PUT] :
       < G : Game | id : I , name : N >
       < B : Service | games : GS >
-      (S send B : put G)
+      (S send B # put G)
     =>
       < B : Service | games : put G in GS > .
 
@@ -73,14 +73,14 @@ mod GAME-SERVICE is ---service B
   rl [POST] :
       < G : Game | id : I , name : N >
       < B : Service | games : GS >
-      (S send B : post G)
+      (S send B # post G)
     =>
       < B : Service | games : put G in GS > .
 
   rl [DELETE] :
       < G : Game | id : I , name : N >
       < B : Service | games : GS ; G >
-      (S send B : delete I)
+      (S send B # delete I)
     =>
       < B : Service | games : GS > .
 endm
@@ -93,10 +93,10 @@ mod INTERFACE is ---service A
   var G S : Oid .
 
   rl [GET] :
-    get I => (A send B : get I) .
+    get I => (A send B # get I) .
 
   rl [PUT] :
-    put G => (A send B : put G) .
+    put G => (A send B # put G) .
 
   rl [RECEIVE] :
     < G : Game | id : I , name : N >
