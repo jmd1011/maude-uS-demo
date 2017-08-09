@@ -24,11 +24,11 @@ mod SERVICE is
   op _send_#_ : Oid Oid Msg -> Msg [ctor] . ***Example: send A : (get K)
   op _receive_ : Oid Msg -> Msg [ctor] .
   op _receive_ : Oid Qid -> Msg [ctor] . ---should I just do subsort Qid < Msg ?
-  op get_ : Nat -> Msg [ctor] .
-  op _get_ : Oid Nat -> Msg [ctor] .
-  op put__ : Nat Qid -> Msg [ctor] .
-  op post__ : Nat Qid -> Msg [ctor] .
-  op delete_ : Nat -> Msg [ctor] .
+  op get_ : Nat -> Msg [ctor frozen] .
+  op _get_ : Oid Nat -> Msg [ctor frozen] .
+  op put__ : Nat Qid -> Msg [ctor frozen] .
+  op post__ : Nat Qid -> Msg [ctor frozen] .
+  op delete_ : Nat -> Msg [ctor frozen] .
 endm
 
 mod A-B-CONTRACT is
@@ -41,28 +41,28 @@ mod A-B-CONTRACT is
   crl [GET] :
       A send B # get N
     =>
-      B receive # A get N
+      B receive (A get N)
     if
       N > 0 .
 
   crl [PUT] :
       A send B # put N Q
     =>
-      B receive # A put N Q
+      B receive (A put N Q)
     if
       N > 0 .
 
   crl [POST] :
       A send B # post N Q
     =>
-      B receive # A post N Q
+      B receive (A post N Q)
     if
       N > 0 .
 
   crl [DELETE] :
       A send B # delete N
     =>
-      B receive # A delete N
+      B receive (A delete N)
     if
       N > 0 .
 endm
