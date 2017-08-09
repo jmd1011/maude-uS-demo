@@ -3,12 +3,12 @@ mod SERVICE is
 	inc QID .
   pr NAT .
 
-	sorts Key Value .
-	subsort Qid < Key .
+  sorts Key Value .
+  subsort Qid < Key .
   subsorts Qid Msg < Value .
 
   sorts GAME GAMESet .
-  subsorts Oid < GAME < GAMESet .  
+  subsorts Oid < GAME < GAMESet .
 
   ops A B : -> Oid [ctor] .
 
@@ -19,27 +19,92 @@ mod SERVICE is
 
   op Game    :     -> Cid [ctor] .
   op id :_   : Nat -> Attribute [ctor gather (&)] .
-  op name :_ : Qid -> Attribute [ctor gather (&)] .  
+  op name :_ : Qid -> Attribute [ctor gather (&)] .
 
   op _send_#_ : Oid Oid Msg -> Msg [ctor] . ***Example: send A : (get K)
   op _receive_ : Oid Msg -> Msg [ctor] .
+  op _receive_ : Oid Qid -> Msg [ctor] . ---should I just do subsort Qid < Msg ?
   op get_ : Nat -> Msg [ctor] .
+  op _get_ : Oid Nat -> Msg [ctor] .
   op put__ : Nat Qid -> Msg [ctor] .
   op post__ : Nat Qid -> Msg [ctor] .
   op delete_ : Nat -> Msg [ctor] .
 endm
 
-mod GAME-SERVICE is ---service B
+mod A-B-CONTRACT is
+  ex SERVICE .
+
+  var M : Msg .
+  var N : Nat .
+  var Q : Qid .
+
+  crl [GET] :
+      A send B # get N
+    =>
+      B receive # A get N
+    if
+      N > 0 .
+
+  crl [PUT] :
+      A send B # put N Q
+    =>
+      B receive # A put N Q
+    if
+      N > 0 .
+
+  crl [POST] :
+      A send B # post N Q
+    =>
+      B receive # A post N Q
+    if
+      N > 0 .
+
+  crl [DELETE] :
+      A send B # delete N
+    =>
+      B receive # A delete N
+    if
+      N > 0 .
+endm
+
+mod SERVICE-A is
+  ex SERVICE .
+
+  var N : Nat .
+  var Q : Qid .
+
+  rl [GET] :
+      get N
+    =>
+      A send B # get N .
+
+  rl [RECEIVE] :
+    A receive Q => Q .
+
+  rl [PUT] :
+      put N Q
+    =>
+      A send B # put N Q .
+
+  rl [POST] :
+      post N Q
+    =>
+      A send B # post N Q .
+
+  rl [DELETE] :
+      delete N
+    =>
+      A send B # delete N .
+
+mod SERVICE-B is
 	ex SERVICE .
 
   op games :_ : GAMESet -> Attribute [ctor gather(&)] .
   op put_in_ : GAME GAMESet -> GAMESet .
 
-  vars C C' : Configuration .
-  var GM    : GAME .
-  var GS    : GAMESet .
+  var GS      : GAMESet .
   vars G G' S : Oid .
-  var I     : Nat .
+  var I       : Nat .
   var N N'    : Qid .
 
   rl [GET] :
@@ -48,14 +113,15 @@ mod GAME-SERVICE is ---service B
       (S send B # get I)
     =>
       < B : Service | games : GS ; G >
-      S receive G .
+      S receive N .
 
   rl [PUT] :
       < G : Game | id : I , name : N >
       < B : Service | games : GS >
       (S send B # put G)
     =>
-      < B : Service | games : put G in GS > .
+      < B : Service | games : put G in GS >
+      S receive 'OK .
 
   rl [UPDATE] :
       < G : Game | id : I , name : N >
@@ -85,25 +151,7 @@ mod GAME-SERVICE is ---service B
       < B : Service | games : GS > .
 endm
 
-mod INTERFACE is ---service A
-  ex SERVICE .
- 
-  var I   : Nat .
-  var N   : Qid .
-  var G S : Oid .
-
-  rl [GET] :
-    get I => (A send B # get I) .
-
-  rl [PUT] :
-    put G => (A send B # put G) .
-
-  rl [RECEIVE] :
-    < G : Game | id : I , name : N >
-    S receive G => N .
-endm
-
 ---(
-Service B -- gets request from user, sends message to Service A to perform request
 Service A -- has a game DB, can read and write from/to DB
+Service B -- gets request from user, sends message to Service A to perform request
 )---
