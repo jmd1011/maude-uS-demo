@@ -94,6 +94,7 @@ mod SERVICE-A is
       delete N
     =>
       A send B # delete N .
+endm
 
 mod SERVICE-B is
 	ex SERVICE .
