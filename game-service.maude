@@ -45,14 +45,14 @@ mod A-B-CONTRACT is
       N > 0 .
 
   crl [PUT] :
-      A send B # put N Q
+      A send B # (put N Q)
     =>
       B receive (A put N Q)
     if
       N > 0 .
 
   crl [POST] :
-      A send B # post N Q
+      A send B # (post N Q)
     =>
       B receive (A post N Q)
     if
@@ -83,12 +83,12 @@ mod SERVICE-A is
   rl [PUT] :
       put N Q
     =>
-      A send B # put N Q .
+      A send B # (put N Q) .
 
   rl [POST] :
       post N Q
     =>
-      A send B # post N Q .
+      A send B # (post N Q) .
 
   rl [DELETE] :
       delete N
@@ -118,7 +118,7 @@ mod SERVICE-B is
   rl [PUT] :
       < G : Game | id : I , name : N >
       < B : Service | games : GS >
-      S send B # put G
+      S send B # (put G)
     =>
       < B : Service | games : put G in GS >
       S receive 'OK .
@@ -139,7 +139,7 @@ mod SERVICE-B is
   rl [POST] :
       < G : Game | id : I , name : N >
       < B : Service | games : GS >
-      (S send B # post G)
+      (S send B # (post G))
     =>
       < B : Service | games : put G in GS > .
 
