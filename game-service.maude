@@ -21,14 +21,15 @@ mod SERVICE is
   op id :_   : Nat -> Attribute [ctor gather (&)] .
   op name :_ : Qid -> Attribute [ctor gather (&)] .
 
-  op _send_#_ : Oid Oid Msg -> Msg [ctor] . ***Example: send A : (get K)
+  op _send_#_ : Oid Oid Msg -> Msg [ctor] .
   op _receive_ : Oid Msg -> Msg [ctor] .
-  op _receive_ : Oid Qid -> Msg [ctor] . ---should I just do subsort Qid < Msg ?
-  op get_ : Nat -> Msg [ctor frozen] .
+  op get_ : Oid -> Msg [ctor frozen] .
+  op delete_ : Oid -> Msg [ctor frozen] .
+  op put__ post__ : Oid Qid -> Msg [ctor frozen] .
+
   op _get_ : Oid Nat -> Msg [ctor frozen] .
-  op put__ : Nat Qid -> Msg [ctor frozen] .
-  op post__ : Nat Qid -> Msg [ctor frozen] .
-  op delete_ : Nat -> Msg [ctor frozen] .
+  op _delete_ : Oid Nat -> Msg [ctor frozen] .
+  op _put__ _post__ : Oid Nat Qid -> Msg [ctor frozen] .
 endm
 
 mod A-B-CONTRACT is
