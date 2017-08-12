@@ -25,6 +25,7 @@ mod SERVICE is
   op _receive_ : Oid Msg -> Msg [ctor] .
   ops get_ delete_ : Nat -> Msg [ctor frozen] .
   ops put__ post__ : Nat Qid -> Msg [ctor frozen] .
+  ops put_ post_ : Oid -> Msg [ctor frozen] .
 
   ops _get_ _delete_ : Oid Nat -> Msg [ctor frozen] .
   ops _put__ _post__ : Oid Nat Qid -> Msg [ctor frozen] .
@@ -110,7 +111,7 @@ mod SERVICE-B is
   rl [GET] :
       < G : Game | id : I , name : N >
       < B : Service | games : GS ; G >
-      (S send B # get I)
+      S send B # get I
     =>
       < B : Service | games : GS ; G >
       S receive N .
@@ -118,7 +119,7 @@ mod SERVICE-B is
   rl [PUT] :
       < G : Game | id : I , name : N >
       < B : Service | games : GS >
-      S send B # (put G)
+      S send B # put G
     =>
       < B : Service | games : put G in GS >
       S receive 'OK .
