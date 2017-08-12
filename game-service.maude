@@ -24,7 +24,7 @@ mod SERVICE is
   op _send_#_ : Oid Oid Msg -> Msg [ctor] .
   op _receive_ : Oid Msg -> Msg [ctor] .
   ops get_ delete_ : Nat -> Msg [ctor frozen] .
-  ops put__ post__ : Oid Qid -> Msg [ctor frozen] .
+  ops put__ post__ : Nat Qid -> Msg [ctor frozen] .
 
   ops _get_ _delete_ : Oid Nat -> Msg [ctor frozen] .
   ops _put__ _post__ : Oid Nat Qid -> Msg [ctor frozen] .
