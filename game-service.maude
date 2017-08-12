@@ -25,11 +25,11 @@ mod SERVICE is
   op _receive_ : Oid Msg -> Msg [ctor] .
   op get_ : Oid -> Msg [ctor frozen] .
   op delete_ : Oid -> Msg [ctor frozen] .
-  op put__ post__ : Oid Qid -> Msg [ctor frozen] .
+  ops put__ post__ : Oid Qid -> Msg [ctor frozen] .
 
   op _get_ : Oid Nat -> Msg [ctor frozen] .
   op _delete_ : Oid Nat -> Msg [ctor frozen] .
-  op _put__ _post__ : Oid Nat Qid -> Msg [ctor frozen] .
+  ops _put__ _post__ : Oid Nat Qid -> Msg [ctor frozen] .
 endm
 
 mod A-B-CONTRACT is
