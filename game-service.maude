@@ -79,59 +79,6 @@ mod A-B-CONTRACT is
       N > 0 .
 endm
 
-mod SERVICE-A is
-  ex SERVICE .
-
-  var N : Nat .
-  var Q : Qid .
-  var GS : GAMESet .
-
-  rl [GET] :
-      < A : Service >
-      < B : Service | games: GS >
-      get N
-    =>
-      < A : Service >
-      < B : Service | games: GS >
-      A send B # get N .
-
-  rl [RECEIVE] :
-      < A : Service >
-      < B : Service | games: GS >
-      A receive Q
-    =>
-      < A : Service >
-      < B : Service | games: GS >
-      Q .
-
-  rl [PUT] :
-      < A : Service >
-      < B : Service | games: GS >
-      put N Q
-    =>
-      < A : Service >
-      < B : Service | games: GS >
-      A send B # (put N Q) .
-
-  rl [POST] :
-      < A : Service >
-      < B : Service | games: GS >
-      post N Q
-    =>
-      < A : Service >
-      < B : Service | games: GS >
-      A send B # (post N Q) .
-
-  rl [DELETE] :
-      < A : Service >
-      < B : Service | games: GS >
-      delete N
-    =>
-      < A : Service >
-      < B : Service | games: GS >
-      A send B # delete N .
-endm
-
 mod SERVICE-B is
 	ex SERVICE .
 
@@ -185,6 +132,59 @@ mod SERVICE-B is
       (S send B # delete I)
     =>
       < B : Service | games : GS > .
+endm
+
+mod SERVICE-A is
+  ex SERVICE-B .
+
+  var N : Nat .
+  var Q : Qid .
+  var GS : GAMESet .
+
+  rl [GET] :
+      < A : Service >
+      < B : Service | games: GS >
+      get N
+    =>
+      < A : Service >
+      < B : Service | games: GS >
+      A send B # get N .
+
+  rl [RECEIVE] :
+      < A : Service >
+      < B : Service | games: GS >
+      A receive Q
+    =>
+      < A : Service >
+      < B : Service | games: GS >
+      Q .
+
+  rl [PUT] :
+      < A : Service >
+      < B : Service | games: GS >
+      put N Q
+    =>
+      < A : Service >
+      < B : Service | games: GS >
+      A send B # (put N Q) .
+
+  rl [POST] :
+      < A : Service >
+      < B : Service | games: GS >
+      post N Q
+    =>
+      < A : Service >
+      < B : Service | games: GS >
+      A send B # (post N Q) .
+
+  rl [DELETE] :
+      < A : Service >
+      < B : Service | games: GS >
+      delete N
+    =>
+      < A : Service >
+      < B : Service | games: GS >
+      A send B # delete N .
 endm
 
 ---(
