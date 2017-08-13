@@ -37,8 +37,13 @@ mod A-B-CONTRACT is
   var M : Msg .
   var N : Nat .
   var Q : Qid .
+  var GS : GAMESet .
+  var G : Oid .
 
   crl [GET] :
+      < G : Game | id: N , name: Q >
+      < A : Service >
+      < B : Service | games: G ; GS >
       A send B # get N
     =>
       B receive (A get N)
@@ -46,6 +51,8 @@ mod A-B-CONTRACT is
       N > 0 .
 
   crl [PUT] :
+      < A : Service >
+      < B : Service | games: GS >
       A send B # (put N Q)
     =>
       B receive (A put N Q)
@@ -53,6 +60,8 @@ mod A-B-CONTRACT is
       N > 0 .
 
   crl [POST] :
+      < A : Service >
+      < B : Service | games: GS >
       A send B # (post N Q)
     =>
       B receive (A post N Q)
@@ -60,6 +69,9 @@ mod A-B-CONTRACT is
       N > 0 .
 
   crl [DELETE] :
+      < G : Game | id: N , name: Q >
+      < A : Service >
+      < B : Service | games: G ; GS >
       A send B # delete N
     =>
       B receive (A delete N)
@@ -72,28 +84,51 @@ mod SERVICE-A is
 
   var N : Nat .
   var Q : Qid .
+  var GS : GAMESet .
 
   rl [GET] :
+      < A : Service >
+      < B : Service | games: GS >
       get N
     =>
+      < A : Service >
+      < B : Service | games: GS >
       A send B # get N .
 
   rl [RECEIVE] :
-    A receive Q => Q .
+      < A : Service >
+      < B : Service | games: GS >
+      A receive Q
+    =>
+      < A : Service >
+      < B : Service | games: GS >
+      Q .
 
   rl [PUT] :
+      < A : Service >
+      < B : Service | games: GS >
       put N Q
     =>
+      < A : Service >
+      < B : Service | games: GS >
       A send B # (put N Q) .
 
   rl [POST] :
+      < A : Service >
+      < B : Service | games: GS >
       post N Q
     =>
+      < A : Service >
+      < B : Service | games: GS >
       A send B # (post N Q) .
 
   rl [DELETE] :
+      < A : Service >
+      < B : Service | games: GS >
       delete N
     =>
+      < A : Service >
+      < B : Service | games: GS >
       A send B # delete N .
 endm
 
