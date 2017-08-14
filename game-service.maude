@@ -108,7 +108,7 @@ mod SERVICE-B is
       < B : Service | games : G ; GS >
       S receive 'OK .
 
-  --(
+  ---(
   rl [UPDATE] :
       < G : Game | id : I , name : N >
       < G' : Game | id : I , name : N' >
