@@ -39,7 +39,7 @@ mod A-B-CONTRACT is
   var Q : Qid .
 
   crl [GET] :
-      < A : Service >
+      < A : Service | >
       < B : Service | >
       A send B # get N
     =>
@@ -48,7 +48,7 @@ mod A-B-CONTRACT is
       N > 0 .
 
   crl [PUT] :
-      < A : Service >
+      < A : Service | >
       < B : Service | >
       A send B # (put N Q)
     =>
@@ -57,7 +57,7 @@ mod A-B-CONTRACT is
       N > 0 .
 
   crl [POST] :
-      < A : Service >
+      < A : Service | >
       < B : Service | >
       A send B # (post N Q)
     =>
@@ -66,7 +66,7 @@ mod A-B-CONTRACT is
       N > 0 .
 
   crl [DELETE] :
-      < A : Service >
+      < A : Service | >
       < B : Service | >
       A send B # delete N
     =>
@@ -138,47 +138,47 @@ mod SERVICE-A is
   var GS : GAMESet .
 
   rl [GET] :
-      < A : Service >
+      < A : Service | >
       < B : Service | >
       get N
     =>
-      < A : Service >
+      < A : Service | >
       < B : Service | >
       A send B # get N .
 
   rl [RECEIVE] :
-      < A : Service >
+      < A : Service | >
       < B : Service | >
       A receive Q
     =>
-      < A : Service >
+      < A : Service | >
       < B : Service | >
       Q .
 
   rl [PUT] :
-      < A : Service >
+      < A : Service | >
       < B : Service | >
       put N Q
     =>
-      < A : Service >
+      < A : Service | >
       < B : Service | >
       A send B # (put N Q) .
 
   rl [POST] :
-      < A : Service >
+      < A : Service | >
       < B : Service | >
       post N Q
     =>
-      < A : Service >
+      < A : Service | >
       < B : Service | >
       A send B # (post N Q) .
 
   rl [DELETE] :
-      < A : Service >
+      < A : Service | >
       < B : Service | >
       delete N
     =>
-      < A : Service >
+      < A : Service | >
       < B : Service | >
       A send B # delete N .
 endm
