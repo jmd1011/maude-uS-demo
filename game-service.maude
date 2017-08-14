@@ -198,14 +198,12 @@ mod TEST-SERVICE is
   ex SERVICE-A .
 
   op initConfig : -> Configuration .
-
-  vars G G' : Oid .
-  var AS : AttributeSet .
+  ops G G' : -> Oid .
 
   eq initConfig =
     < G : Game | id : 1 , name : 'Test >
     < G' : Game | id : 2 , name : 'Test2 >
-    < A : Service | AS >
+    < A : Service | none >
     < B : Service | games: G ; G' > .
 
 endm
