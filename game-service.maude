@@ -79,7 +79,7 @@ endm
 mod SERVICE-B is
   ex SERVICE .
 
-  op games:_ : GAMESet -> Attribute [ctor gather(&)] .
+  op games :_ : GAMESet -> Attribute [ctor gather(&)] .
   op put_in_ : GAME GAMESet -> GAMESet .
 
   var GS      : GAMESet .
