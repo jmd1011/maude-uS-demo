@@ -194,7 +194,18 @@ mod SERVICE-A is
       A send B # delete N .
 endm
 
----(
-Service A -- has a game DB, can read and write from/to DB
-Service B -- gets request from user, sends message to Service A to perform request
-)---
+mod TEST-SERVICE is
+  ex SERVICE-A .
+
+  op initConfig : -> Configuration .
+
+  vars G G' : Oid .
+  var AS : AttributeSet .
+
+  eq initConfig =
+    < G : Game | id : 1 , name : 'Test >
+    < G' : Game | id : 2 , name : 'Test2 >
+    < A : Service | AS >
+    < B : Service | games: G ; G' > .
+
+endm
