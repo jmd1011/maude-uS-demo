@@ -105,9 +105,10 @@ mod SERVICE-B is
       S send B # put G
     =>
       < S : Service | AS >
-      < B : Service | games : put G in GS >
+      < B : Service | games : G ; GS >
       S receive 'OK .
 
+  --(
   rl [UPDATE] :
       < G : Game | id : I , name : N >
       < G' : Game | id : I , name : N' >
@@ -120,6 +121,7 @@ mod SERVICE-B is
       put G in GS
     =>
       GS ; G .
+  )---
 
   rl [POST] :
       < G : Game | id : I , name : N >
@@ -127,7 +129,7 @@ mod SERVICE-B is
       < B : Service | games : GS >
       (S send B # (post G))
     =>
-      < B : Service | games : put G in GS > .
+      < B : Service | games : G ; GS > .
 
   rl [DELETE] :
       < G : Game | id : I , name : N >
