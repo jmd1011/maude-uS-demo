@@ -102,6 +102,7 @@ mod SERVICE-B is
       < B : Service | games : G ; GS >
       S send B # get I
     =>
+      < G : Game | id : I , name : N >
       < S : Service | AS >
       < B : Service | games : G ; GS >
       S receive N .
