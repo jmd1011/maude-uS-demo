@@ -1,6 +1,6 @@
 mod SERVICE is
-	inc CONFIGURATION .
-	inc QID .
+  inc CONFIGURATION .
+  inc QID .
   pr NAT .
 
   sorts Key Value .
@@ -37,10 +37,11 @@ mod A-B-CONTRACT is
   var M : Msg .
   var N : Nat .
   var Q : Qid .
+  vars AS AS' : AttributeSet .
 
   crl [GET] :
-      < A : Service | >
-      < B : Service | >
+      < A : Service | AS >
+      < B : Service | AS' >
       A send B # get N
     =>
       B receive (A get N)
@@ -48,8 +49,8 @@ mod A-B-CONTRACT is
       N > 0 .
 
   crl [PUT] :
-      < A : Service | >
-      < B : Service | >
+      < A : Service | AS >
+      < B : Service | AS' >
       A send B # (put N Q)
     =>
       B receive (A put N Q)
@@ -57,8 +58,8 @@ mod A-B-CONTRACT is
       N > 0 .
 
   crl [POST] :
-      < A : Service | >
-      < B : Service | >
+      < A : Service | AS >
+      < B : Service | AS' >
       A send B # (post N Q)
     =>
       B receive (A post N Q)
@@ -66,8 +67,8 @@ mod A-B-CONTRACT is
       N > 0 .
 
   crl [DELETE] :
-      < A : Service | >
-      < B : Service | >
+      < A : Service | AS >
+      < B : Service | AS' >
       A send B # delete N
     =>
       B receive (A delete N)
@@ -76,7 +77,7 @@ mod A-B-CONTRACT is
 endm
 
 mod SERVICE-B is
-	ex SERVICE .
+  ex SERVICE .
 
   op games:_ : GAMESet -> Attribute [ctor gather(&)] .
   op put_in_ : GAME GAMESet -> GAMESet .
@@ -85,20 +86,25 @@ mod SERVICE-B is
   vars G G' S : Oid .
   var I       : Nat .
   var N N'    : Qid .
+  var AS      : AttributeSet .
 
   rl [GET] :
       < G : Game | id : I , name : N >
+      < S : Service | AS >
       < B : Service | games : GS ; G >
       S send B # get I
     =>
+      < S : Service | AS >
       < B : Service | games : GS ; G >
       S receive N .
 
   rl [PUT] :
       < G : Game | id : I , name : N >
+      < S : Service | AS >
       < B : Service | games : GS >
       S send B # put G
     =>
+      < S : Service | AS >
       < B : Service | games : put G in GS >
       S receive 'OK .
 
@@ -117,6 +123,7 @@ mod SERVICE-B is
 
   rl [POST] :
       < G : Game | id : I , name : N >
+      < S : Service | AS >
       < B : Service | games : GS >
       (S send B # (post G))
     =>
@@ -124,6 +131,7 @@ mod SERVICE-B is
 
   rl [DELETE] :
       < G : Game | id : I , name : N >
+      < S : Service | AS >
       < B : Service | games : GS ; G >
       (S send B # delete I)
     =>
@@ -136,50 +144,51 @@ mod SERVICE-A is
   var N : Nat .
   var Q : Qid .
   var GS : GAMESet .
+  var AS AS' : AttributeSet .
 
   rl [GET] :
-      < A : Service | >
-      < B : Service | >
+      < A : Service | AS >
+      < B : Service | AS' >
       get N
     =>
-      < A : Service | >
-      < B : Service | >
+      < A : Service | AS >
+      < B : Service | AS' >
       A send B # get N .
 
   rl [RECEIVE] :
-      < A : Service | >
-      < B : Service | >
+      < A : Service | AS >
+      < B : Service | AS' >
       A receive Q
     =>
-      < A : Service | >
-      < B : Service | >
+      < A : Service | AS >
+      < B : Service | AS' >
       Q .
 
   rl [PUT] :
-      < A : Service | >
-      < B : Service | >
+      < A : Service | AS >
+      < B : Service | AS' >
       put N Q
     =>
-      < A : Service | >
-      < B : Service | >
+      < A : Service | AS >
+      < B : Service | AS' >
       A send B # (put N Q) .
 
   rl [POST] :
-      < A : Service | >
-      < B : Service | >
+      < A : Service | AS >
+      < B : Service | AS' >
       post N Q
     =>
-      < A : Service | >
-      < B : Service | >
+      < A : Service | AS >
+      < B : Service | AS' >
       A send B # (post N Q) .
 
   rl [DELETE] :
-      < A : Service | >
-      < B : Service | >
+      < A : Service | AS >
+      < B : Service | AS' >
       delete N
     =>
-      < A : Service | >
-      < B : Service | >
+      < A : Service | AS >
+      < B : Service | AS' >
       A send B # delete N .
 endm
 
