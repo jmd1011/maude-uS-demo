@@ -37,11 +37,8 @@ mod A-B-CONTRACT is
   var M : Msg .
   var N : Nat .
   var Q : Qid .
-  var GS : GAMESet .
-  var G : Oid .
 
   crl [GET] :
-      < G : Game | id : N , name : Q >
       < A : Service >
       < B : Service | >
       A send B # get N
