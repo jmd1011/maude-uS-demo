@@ -44,6 +44,8 @@ mod A-B-CONTRACT is
       < B : Service | AS' >
       A send B # get N
     =>
+      < A : Service | AS >
+      < B : Service | AS' >
       B receive (A get N)
     if
       N > 0 .
@@ -53,6 +55,8 @@ mod A-B-CONTRACT is
       < B : Service | AS' >
       A send B # (put N Q)
     =>
+      < A : Service | AS >
+      < B : Service | AS' >
       B receive (A put N Q)
     if
       N > 0 .
@@ -62,6 +66,8 @@ mod A-B-CONTRACT is
       < B : Service | AS' >
       A send B # (post N Q)
     =>
+      < A : Service | AS >
+      < B : Service | AS' >
       B receive (A post N Q)
     if
       N > 0 .
@@ -71,6 +77,8 @@ mod A-B-CONTRACT is
       < B : Service | AS' >
       A send B # delete N
     =>
+      < A : Service | AS >
+      < B : Service | AS' >
       B receive (A delete N)
     if
       N > 0 .
@@ -91,11 +99,11 @@ mod SERVICE-B is
   rl [GET] :
       < G : Game | id : I , name : N >
       < S : Service | AS >
-      < B : Service | games : GS ; G >
+      < B : Service | games : G ; GS >
       S send B # get I
     =>
       < S : Service | AS >
-      < B : Service | games : GS ; G >
+      < B : Service | games : G ; GS >
       S receive N .
 
   rl [PUT] :
@@ -137,15 +145,15 @@ mod SERVICE-B is
       < B : Service | games : GS ; G >
       (S send B # delete I)
     =>
+      < S : Service | AS >
       < B : Service | games : GS > .
 endm
 
 mod SERVICE-A is
-  ex SERVICE-B .
+  ex SERVICE .
 
   var N : Nat .
   var Q : Qid .
-  var GS : GAMESet .
   var AS AS' : AttributeSet .
 
   rl [GET] :
@@ -196,6 +204,7 @@ endm
 
 mod TEST-SERVICE is
   ex SERVICE-A .
+  ex SERVICE-B .
 
   op initConfig : -> Configuration .
   ops G G' : -> Oid .
@@ -204,6 +213,6 @@ mod TEST-SERVICE is
     < G : Game | id : 1 , name : 'Test >
     < G' : Game | id : 2 , name : 'Test2 >
     < A : Service | none >
-    < B : Service | games: G ; G' > .
+    < B : Service | games : G ; G' > .
 
 endm
