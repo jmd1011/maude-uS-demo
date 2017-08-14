@@ -18,8 +18,8 @@ mod SERVICE is
   op Service : -> Cid [ctor] .
 
   op Game    :     -> Cid [ctor] .
-  op id :_   : Nat -> Attribute [ctor gather (&)] .
-  op name :_ : Qid -> Attribute [ctor gather (&)] .
+  op id:_   : Nat -> Attribute [ctor gather (&)] .
+  op name:_ : Qid -> Attribute [ctor gather (&)] .
 
   op _send_#_ : Oid Oid Msg -> Msg [ctor] .
   op _receive_ : Oid Msg -> Msg [ctor] .
@@ -43,7 +43,7 @@ mod A-B-CONTRACT is
   crl [GET] :
       < G : Game | id: N , name: Q >
       < A : Service >
-      < B : Service | games: G ; GS >
+      < B : Service | >
       A send B # get N
     =>
       B receive (A get N)
@@ -52,7 +52,7 @@ mod A-B-CONTRACT is
 
   crl [PUT] :
       < A : Service >
-      < B : Service | games: GS >
+      < B : Service | >
       A send B # (put N Q)
     =>
       B receive (A put N Q)
@@ -61,7 +61,7 @@ mod A-B-CONTRACT is
 
   crl [POST] :
       < A : Service >
-      < B : Service | games: GS >
+      < B : Service | >
       A send B # (post N Q)
     =>
       B receive (A post N Q)
@@ -69,9 +69,8 @@ mod A-B-CONTRACT is
       N > 0 .
 
   crl [DELETE] :
-      < G : Game | id: N , name: Q >
       < A : Service >
-      < B : Service | games: G ; GS >
+      < B : Service | >
       A send B # delete N
     =>
       B receive (A delete N)
@@ -82,7 +81,7 @@ endm
 mod SERVICE-B is
 	ex SERVICE .
 
-  op games :_ : GAMESet -> Attribute [ctor gather(&)] .
+  op games:_ : GAMESet -> Attribute [ctor gather(&)] .
   op put_in_ : GAME GAMESet -> GAMESet .
 
   var GS      : GAMESet .
@@ -143,47 +142,47 @@ mod SERVICE-A is
 
   rl [GET] :
       < A : Service >
-      < B : Service | games: GS >
+      < B : Service | >
       get N
     =>
       < A : Service >
-      < B : Service | games: GS >
+      < B : Service | >
       A send B # get N .
 
   rl [RECEIVE] :
       < A : Service >
-      < B : Service | games: GS >
+      < B : Service | >
       A receive Q
     =>
       < A : Service >
-      < B : Service | games: GS >
+      < B : Service | >
       Q .
 
   rl [PUT] :
       < A : Service >
-      < B : Service | games: GS >
+      < B : Service | >
       put N Q
     =>
       < A : Service >
-      < B : Service | games: GS >
+      < B : Service | >
       A send B # (put N Q) .
 
   rl [POST] :
       < A : Service >
-      < B : Service | games: GS >
+      < B : Service | >
       post N Q
     =>
       < A : Service >
-      < B : Service | games: GS >
+      < B : Service | >
       A send B # (post N Q) .
 
   rl [DELETE] :
       < A : Service >
-      < B : Service | games: GS >
+      < B : Service | >
       delete N
     =>
       < A : Service >
-      < B : Service | games: GS >
+      < B : Service | >
       A send B # delete N .
 endm
 
