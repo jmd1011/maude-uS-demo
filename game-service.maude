@@ -18,8 +18,8 @@ mod SERVICE is
   op Service : -> Cid [ctor] .
 
   op Game    :     -> Cid [ctor] .
-  op id:_   : Nat -> Attribute [ctor gather (&)] .
-  op name:_ : Qid -> Attribute [ctor gather (&)] .
+  op id :_   : Nat -> Attribute [ctor gather (&)] .
+  op name :_ : Qid -> Attribute [ctor gather (&)] .
 
   op _send_#_ : Oid Oid Msg -> Msg [ctor] .
   op _receive_ : Oid Msg -> Msg [ctor] .
@@ -41,7 +41,7 @@ mod A-B-CONTRACT is
   var G : Oid .
 
   crl [GET] :
-      < G : Game | id: N , name: Q >
+      < G : Game | id : N , name : Q >
       < A : Service >
       < B : Service | >
       A send B # get N
