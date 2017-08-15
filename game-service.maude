@@ -8,6 +8,7 @@ mod SERVICE is
   subsorts Qid Msg < Value .
 
   op Service : -> Cid [ctor] .  
+  ops A B : -> Oid [ctor] .
 
   **********************
   ***CONSOLE COMMANDS***
@@ -119,8 +120,6 @@ mod SERVICE-B is
 
   sorts GAME GAMESet .
   subsorts Oid < GAME < GAMESet .
-
-  ops A B : -> Oid [ctor] .
 
   op empty : -> GAMESet [ctor] .
   op _;_ : GAMESet GAMESet -> GAMESet [ctor assoc comm id: empty] .
