@@ -23,6 +23,7 @@ mod SERVICE is
   op _receive_     : Oid Msg -> Msg [ctor] .
   ops _get_ _delete_ : Oid Nat -> Msg [ctor frozen] .
   ops _put__ _post__ : Oid Nat Qid -> Msg [ctor frozen] .
+  ops put_ post_ : Oid -> Msg [ctor frozen] .
 endm
 
 mod SERVICE-B is
@@ -39,16 +40,12 @@ mod SERVICE-B is
   op name :_ : Qid -> Attribute [ctor gather (&)] .
 
   op games :_ : GAMESet -> Attribute [ctor gather(&)] .
-  op _in_ : Nat GAMESet -> Bool .
 
   var GS      : GAMESet .
   vars G G' S : Oid .
   var I       : Nat .
   var N N'    : Qid .
   var AS      : AttributeSet .
-
-  eq I in empty = false .
-  eq I in < G : Game | id : I , name : N > ; GS = true .
 
   rl [GET] :
       < G : Game | id : I , name : N >
