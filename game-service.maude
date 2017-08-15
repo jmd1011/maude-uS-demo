@@ -15,7 +15,6 @@ mod SERVICE is
   **********************
   ops get_ delete_ : Nat -> Msg [ctor frozen] .
   ops put__ post__ : Nat Qid -> Msg [ctor frozen] .
-  ops put_ post_   : Oid -> Msg [ctor frozen] .
 
   **********************
   ***SERVICE COMMANDS***
@@ -40,12 +39,16 @@ mod SERVICE-B is
   op name :_ : Qid -> Attribute [ctor gather (&)] .
 
   op games :_ : GAMESet -> Attribute [ctor gather(&)] .
+  op _in_ : Nat GAMESet -> Bool .
 
   var GS      : GAMESet .
   vars G G' S : Oid .
   var I       : Nat .
   var N N'    : Qid .
   var AS      : AttributeSet .
+
+  eq I in empty = false .
+  eq I in < G : Game | id : I , name : N > ; GS = true .
 
   rl [GET] :
       < G : Game | id : I , name : N >
@@ -245,5 +248,4 @@ mod TEST-SERVICE is
     < G' : Game | id : 2 , name : 'Test2 >
     < A : Service | none >
     < B : Service | games : G ; G' > .
-
 endm
