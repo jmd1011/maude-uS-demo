@@ -177,7 +177,7 @@ mod SERVICE-B is
     =>
       < G : Game | id : I , name : N >
       < S : Service | AS >
-      < B : Service | games : G ; GS > .
+      < B : Service | games : G ; GS >
       S receive 'OK .
 
   rl [DELETE] :
@@ -187,7 +187,7 @@ mod SERVICE-B is
       (S send B # delete I)
     =>
       < S : Service | AS >
-      < B : Service | games : GS > .
+      < B : Service | games : GS >
       S receive 'OK .
 endm
 
