@@ -26,95 +26,6 @@ mod SERVICE is
   ops _put__ _post__ : Oid Nat Qid -> Msg [ctor frozen] .
 endm
 
-mod A-B-CONTRACT is
-  ex SERVICE .
-
-  var M : Msg .
-  var N : Nat .
-  var Q : Qid .
-  vars AS AS' : AttributeSet .
-
-  crl [GET-OK] :
-      < A : Service | AS >
-      < B : Service | AS' >
-      A send B # get N
-    =>
-      < A : Service | AS >
-      < B : Service | AS' >
-      B receive (A get N)
-    if
-      N > 0 .
-
-  crl [PUT-OK] :
-      < A : Service | AS >
-      < B : Service | AS' >
-      A send B # (put N Q)
-    =>
-      < A : Service | AS >
-      < B : Service | AS' >
-      B receive (A put N Q)
-    if
-      N > 0 .
-
-  crl [POST-OK] :
-      < A : Service | AS >
-      < B : Service | AS' >
-      A send B # (post N Q)
-    =>
-      < A : Service | AS >
-      < B : Service | AS' >
-      B receive (A post N Q)
-    if
-      N > 0 .
-
-  crl [DELETE-OK] :
-      < A : Service | AS >
-      < B : Service | AS' >
-      A send B # delete N
-    =>
-      < A : Service | AS >
-      < B : Service | AS' >
-      B receive (A delete N)
-    if
-      N > 0 .
-
-  rl [GET-FAIL] :
-      < A : Service | AS >
-      < B : Service | AS' >
-      A send B # get 0
-    =>
-      < A : Service | AS >
-      < B : Service | AS' >
-      A receive 'FAIL .
-
-  rl [PUT-FAIL] :
-      < A : Service | AS >
-      < B : Service | AS' >
-      A send B # (put 0 Q)
-    =>
-      < A : Service | AS >
-      < B : Service | AS' >
-      A receive 'FAIL .
-
-  rl [POST-FAIL] :
-      < A : Service | AS >
-      < B : Service | AS' >
-      A send B # (post 0 Q)
-    =>
-      < A : Service | AS >
-      < B : Service | AS' >
-      A receive 'FAIL .
-
-  rl [DELETE-FAIL] :
-      < A : Service | AS >
-      < B : Service | AS' >
-      A send B # delete 0
-    =>
-      < A : Service | AS >
-      < B : Service | AS' >
-      A receive 'FAIL .
-endm
-
 mod SERVICE-B is
   ex SERVICE .
 
@@ -129,24 +40,12 @@ mod SERVICE-B is
   op name :_ : Qid -> Attribute [ctor gather (&)] .
 
   op games :_ : GAMESet -> Attribute [ctor gather(&)] .
-  op _in_ : Nat GAMESet -> Bool .
 
   var GS      : GAMESet .
   vars G G' S : Oid .
   var I       : Nat .
   var N N'    : Qid .
   var AS      : AttributeSet .
-
-  crl [GET-FAIL] :
-      < S : Service | AS >
-      < B : Service | games : GS >
-      S send B # get I
-    =>
-      < S : Service | AS >
-      < B : Service | games : GS >
-      S receive 'FAIL
-    if
-      not (I in GS) .
 
   rl [GET] :
       < G : Game | id : I , name : N >
@@ -242,6 +141,96 @@ mod SERVICE-A is
       < A : Service | AS >
       < B : Service | AS' >
       A send B # delete N .
+endm
+
+mod A-B-CONTRACT is
+  ex SERVICE-A .
+  ex SERVICE-B .
+
+  var M : Msg .
+  var N : Nat .
+  var Q : Qid .
+  var GS : GAMESet .
+
+  crl [GET-OK] :
+      < A : Service | none >
+      < B : Service | games : GS >
+      A send B # get N
+    =>
+      < A : Service | none >
+      < B : Service | games : GS >
+      B receive (A get N)
+    if
+      N > 0 .
+
+  crl [PUT-OK] :
+      < A : Service | none >
+      < B : Service | games : GS >
+      A send B # (put N Q)
+    =>
+      < A : Service | none >
+      < B : Service | games : GS >
+      B receive (A put N Q)
+    if
+      N > 0 .
+
+  crl [POST-OK] :
+      < A : Service | none >
+      < B : Service | games : GS >
+      A send B # (post N Q)
+    =>
+      < A : Service | none >
+      < B : Service | games : GS >
+      B receive (A post N Q)
+    if
+      N > 0 .
+
+  crl [DELETE-OK] :
+      < A : Service | none >
+      < B : Service | games : GS >
+      A send B # delete N
+    =>
+      < A : Service | none >
+      < B : Service | games : GS >
+      B receive (A delete N)
+    if
+      N > 0 .
+
+  rl [GET-FAIL] :
+      < A : Service | none >
+      < B : Service | games : GS >
+      A send B # get 0
+    =>
+      < A : Service | none >
+      < B : Service | games : GS >
+      A receive 'FAIL .
+
+  rl [PUT-FAIL] :
+      < A : Service | none >
+      < B : Service | games : GS >
+      A send B # (put 0 Q)
+    =>
+      < A : Service | none >
+      < B : Service | games : GS >
+      A receive 'FAIL .
+
+  rl [POST-FAIL] :
+      < A : Service | none >
+      < B : Service | games : GS >
+      A send B # (post 0 Q)
+    =>
+      < A : Service | none >
+      < B : Service | games : GS >
+      A receive 'FAIL .
+
+  rl [DELETE-FAIL] :
+      < A : Service | none >
+      < B : Service | games : GS >
+      A send B # delete 0
+    =>
+      < A : Service | none >
+      < B : Service | games : GS >
+      A receive 'FAIL .
 endm
 
 mod TEST-SERVICE is
