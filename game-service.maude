@@ -41,27 +41,12 @@ mod SERVICE-B is
   op name :_ : Qid -> Attribute [ctor gather (&)] .
 
   op games :_ : GAMESet -> Attribute [ctor gather(&)] .
-  op _in_ : Nat GAMESet -> Bool .
 
   var GS      : GAMESet .
   vars G G' S : Oid .
   var I       : Nat .
   var N N'    : Qid .
   var AS      : AttributeSet .
-
-  eq I in < G : Game | id : I , name : N > ; GS = true .
-  eq I in GS = false [owise] .
-
-  crl [GET-FAIL] :
-      < S : Service | AS >
-      < B : Service | games : GS >
-      S send B # get I
-    =>
-      < S : Service | AS >
-      < B : Service | games : GS >
-      S receive 'FAIL
-    if
-      not (I in GS) .
 
   rl [GET] :
       < G : Game | id : I , name : N >
