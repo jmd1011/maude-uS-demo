@@ -107,7 +107,7 @@ mod SERVICE-B is
 endm
 
 mod SERVICE-A is
-  ex SERVICE B .
+  ex SERVICE-B .
 
   op A : -> Oid [ctor] .
 
