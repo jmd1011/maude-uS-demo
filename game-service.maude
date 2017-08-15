@@ -25,8 +25,143 @@ mod SERVICE is
   ops _put__ _post__ : Oid Nat Qid -> Msg [ctor frozen] .
 endm
 
-mod A-B-CONTRACT is
+mod SERVICE-A is
   ex SERVICE .
+
+  var N : Nat .
+  var Q : Qid .
+  var AS AS' : AttributeSet .
+
+  rl [GET] :
+      < A : Service | AS >
+      < B : Service | AS' >
+      get N
+    =>
+      < A : Service | AS >
+      < B : Service | AS' >
+      A send B # get N .
+
+  rl [RECEIVE] :
+      < A : Service | AS >
+      < B : Service | AS' >
+      A receive Q
+    =>
+      < A : Service | AS >
+      < B : Service | AS' >
+      Q .
+
+  rl [PUT] :
+      < A : Service | AS >
+      < B : Service | AS' >
+      put N Q
+    =>
+      < A : Service | AS >
+      < B : Service | AS' >
+      A send B # (put N Q) .
+
+  rl [POST] :
+      < A : Service | AS >
+      < B : Service | AS' >
+      post N Q
+    =>
+      < A : Service | AS >
+      < B : Service | AS' >
+      A send B # (post N Q) .
+
+  rl [DELETE] :
+      < A : Service | AS >
+      < B : Service | AS' >
+      delete N
+    =>
+      < A : Service | AS >
+      < B : Service | AS' >
+      A send B # delete N .
+endm
+
+mod SERVICE-B is
+  ex SERVICE .
+
+  sorts GAME GAMESet .
+  subsorts Oid < GAME < GAMESet .
+
+  ops A B : -> Oid [ctor] .
+
+  op empty : -> GAMESet [ctor] .
+  op _;_ : GAMESet GAMESet -> GAMESet [ctor assoc comm id: empty] .
+
+  op Game    :     -> Cid [ctor] .
+  op id :_   : Nat -> Attribute [ctor gather (&)] .
+  op name :_ : Qid -> Attribute [ctor gather (&)] .
+
+  op games :_ : GAMESet -> Attribute [ctor gather(&)] .
+  op _in_ : Nat GAMESet -> Bool .
+
+  var GS      : GAMESet .
+  vars G G' S : Oid .
+  var I       : Nat .
+  var N N'    : Qid .
+  var AS      : AttributeSet .
+
+  eq I in < G : Game | id : I , name : N > ; GS = true .
+  eq I in GS = false [owise] .
+
+  crl [GET-FAIL] :
+      < S : Service | AS >
+      < B : Service | games : GS >
+      S send B # get I
+    =>
+      < S : Service | AS >
+      < B : Service | games : GS >
+      S receive 'FAIL
+    if
+      not (I in GS) .
+
+  rl [GET] :
+      < G : Game | id : I , name : N >
+      < S : Service | AS >
+      < B : Service | games : G ; GS >
+      S send B # get I
+    =>
+      < G : Game | id : I , name : N >
+      < S : Service | AS >
+      < B : Service | games : G ; GS >
+      S receive N .
+
+  rl [PUT] :
+      < G : Game | id : I , name : N >
+      < S : Service | AS >
+      < B : Service | games : GS >
+      S send B # put G
+    =>
+      < S : Service | AS >
+      < B : Service | games : G ; GS >
+      S receive 'OK .
+
+  rl [POST] :
+      < G : Game | id : I , name : N >
+      < S : Service | AS >
+      < B : Service | games : GS >
+      (S send B # (post G))
+    =>
+      < G : Game | id : I , name : N >
+      < S : Service | AS >
+      < B : Service | games : G ; GS > .
+      S receive 'OK .
+
+  rl [DELETE] :
+      < G : Game | id : I , name : N >
+      < S : Service | AS >
+      < B : Service | games : GS ; G >
+      (S send B # delete I)
+    =>
+      < S : Service | AS >
+      < B : Service | games : GS > .
+      S receive 'OK .
+endm
+
+mod A-B-CONTRACT is
+  ex SERVICE A .
+  ex SERVICE B .
 
   var M : Msg .
   var N : Nat .
@@ -112,140 +247,6 @@ mod A-B-CONTRACT is
       < A : Service | AS >
       < B : Service | AS' >
       A receive 'FAIL .
-endm
-
-mod SERVICE-B is
-  ex SERVICE .
-
-  sorts GAME GAMESet .
-  subsorts Oid < GAME < GAMESet .
-
-  ops A B : -> Oid [ctor] .
-
-  op empty : -> GAMESet [ctor] .
-  op _;_ : GAMESet GAMESet -> GAMESet [ctor assoc comm id: empty] .
-
-  op Game    :     -> Cid [ctor] .
-  op id :_   : Nat -> Attribute [ctor gather (&)] .
-  op name :_ : Qid -> Attribute [ctor gather (&)] .
-
-  op games :_ : GAMESet -> Attribute [ctor gather(&)] .
-  op _in_ : Nat GAMESet -> Bool .
-
-  var GS      : GAMESet .
-  vars G G' S : Oid .
-  var I       : Nat .
-  var N N'    : Qid .
-  var AS      : AttributeSet .
-
-  eq I in < G : Game | id : I , name : N > ; GS = true .
-  eq I in GS = false [owise] .
-
-  crl [GET-FAIL] :
-      < S : Service | AS >
-      < B : Service | games : GS >
-      S send B # get I
-    =>
-      < S : Service | AS >
-      < B : Service | games : GS >
-      S receive 'FAIL
-    if
-      not (I in GS) .
-
-  rl [GET] :
-      < G : Game | id : I , name : N >
-      < S : Service | AS >
-      < B : Service | games : G ; GS >
-      S send B # get I
-    =>
-      < G : Game | id : I , name : N >
-      < S : Service | AS >
-      < B : Service | games : G ; GS >
-      S receive N .
-
-  rl [PUT] :
-      < G : Game | id : I , name : N >
-      < S : Service | AS >
-      < B : Service | games : GS >
-      S send B # put G
-    =>
-      < S : Service | AS >
-      < B : Service | games : G ; GS >
-      S receive 'OK .
-
-  rl [POST] :
-      < G : Game | id : I , name : N >
-      < S : Service | AS >
-      < B : Service | games : GS >
-      (S send B # (post G))
-    =>
-      < G : Game | id : I , name : N >
-      < S : Service | AS >
-      < B : Service | games : G ; GS > .
-      S receive 'OK .
-
-  rl [DELETE] :
-      < G : Game | id : I , name : N >
-      < S : Service | AS >
-      < B : Service | games : GS ; G >
-      (S send B # delete I)
-    =>
-      < S : Service | AS >
-      < B : Service | games : GS > .
-      S receive 'OK .
-endm
-
-mod SERVICE-A is
-  ex SERVICE .
-
-  var N : Nat .
-  var Q : Qid .
-  var AS AS' : AttributeSet .
-
-  rl [GET] :
-      < A : Service | AS >
-      < B : Service | AS' >
-      get N
-    =>
-      < A : Service | AS >
-      < B : Service | AS' >
-      A send B # get N .
-
-  rl [RECEIVE] :
-      < A : Service | AS >
-      < B : Service | AS' >
-      A receive Q
-    =>
-      < A : Service | AS >
-      < B : Service | AS' >
-      Q .
-
-  rl [PUT] :
-      < A : Service | AS >
-      < B : Service | AS' >
-      put N Q
-    =>
-      < A : Service | AS >
-      < B : Service | AS' >
-      A send B # (put N Q) .
-
-  rl [POST] :
-      < A : Service | AS >
-      < B : Service | AS' >
-      post N Q
-    =>
-      < A : Service | AS >
-      < B : Service | AS' >
-      A send B # (post N Q) .
-
-  rl [DELETE] :
-      < A : Service | AS >
-      < B : Service | AS' >
-      delete N
-    =>
-      < A : Service | AS >
-      < B : Service | AS' >
-      A send B # delete N .
 endm
 
 mod TEST-SERVICE is
