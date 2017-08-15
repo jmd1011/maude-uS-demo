@@ -25,66 +25,13 @@ mod SERVICE is
   ops _put__ _post__ : Oid Nat Qid -> Msg [ctor frozen] .
 endm
 
-mod SERVICE-A is
-  ex SERVICE .
-
-  var N : Nat .
-  var Q : Qid .
-  var AS AS' : AttributeSet .
-
-  rl [GET] :
-      < A : Service | AS >
-      < B : Service | AS' >
-      get N
-    =>
-      < A : Service | AS >
-      < B : Service | AS' >
-      A send B # get N .
-
-  rl [RECEIVE] :
-      < A : Service | AS >
-      < B : Service | AS' >
-      A receive Q
-    =>
-      < A : Service | AS >
-      < B : Service | AS' >
-      Q .
-
-  rl [PUT] :
-      < A : Service | AS >
-      < B : Service | AS' >
-      put N Q
-    =>
-      < A : Service | AS >
-      < B : Service | AS' >
-      A send B # (put N Q) .
-
-  rl [POST] :
-      < A : Service | AS >
-      < B : Service | AS' >
-      post N Q
-    =>
-      < A : Service | AS >
-      < B : Service | AS' >
-      A send B # (post N Q) .
-
-  rl [DELETE] :
-      < A : Service | AS >
-      < B : Service | AS' >
-      delete N
-    =>
-      < A : Service | AS >
-      < B : Service | AS' >
-      A send B # delete N .
-endm
-
 mod SERVICE-B is
   ex SERVICE .
 
   sorts GAME GAMESet .
   subsorts Oid < GAME < GAMESet .
 
-  ops A B : -> Oid [ctor] .
+  op B : -> Oid [ctor] .
 
   op empty : -> GAMESet [ctor] .
   op _;_ : GAMESet GAMESet -> GAMESet [ctor assoc comm id: empty] .
@@ -157,6 +104,61 @@ mod SERVICE-B is
       < S : Service | AS >
       < B : Service | games : GS > .
       S receive 'OK .
+endm
+
+mod SERVICE-A is
+  ex SERVICE B .
+
+  op A : -> Oid [ctor] .
+
+  var N : Nat .
+  var Q : Qid .
+  var AS AS' : AttributeSet .
+
+  rl [GET] :
+      < A : Service | AS >
+      < B : Service | AS' >
+      get N
+    =>
+      < A : Service | AS >
+      < B : Service | AS' >
+      A send B # get N .
+
+  rl [RECEIVE] :
+      < A : Service | AS >
+      < B : Service | AS' >
+      A receive Q
+    =>
+      < A : Service | AS >
+      < B : Service | AS' >
+      Q .
+
+  rl [PUT] :
+      < A : Service | AS >
+      < B : Service | AS' >
+      put N Q
+    =>
+      < A : Service | AS >
+      < B : Service | AS' >
+      A send B # (put N Q) .
+
+  rl [POST] :
+      < A : Service | AS >
+      < B : Service | AS' >
+      post N Q
+    =>
+      < A : Service | AS >
+      < B : Service | AS' >
+      A send B # (post N Q) .
+
+  rl [DELETE] :
+      < A : Service | AS >
+      < B : Service | AS' >
+      delete N
+    =>
+      < A : Service | AS >
+      < B : Service | AS' >
+      A send B # delete N .
 endm
 
 mod A-B-CONTRACT is
