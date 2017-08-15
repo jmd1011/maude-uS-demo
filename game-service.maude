@@ -7,14 +7,6 @@ mod SERVICE is
   subsort Qid < Key .
   subsorts Qid Msg < Value .
 
-  sorts GAME GAMESet .
-  subsorts Oid < GAME < GAMESet .
-
-  ops A B : -> Oid [ctor] .
-
-  op empty : -> GAMESet [ctor] .
-  op _;_ : GAMESet GAMESet -> GAMESet [ctor assoc comm id: empty] .
-
   op Service : -> Cid [ctor] .  
 
   **********************
@@ -85,66 +77,80 @@ mod A-B-CONTRACT is
     if
       N > 0 .
 
-  crl [GET-FAIL] :
+  rl [GET-FAIL] :
       < A : Service | AS >
       < B : Service | AS' >
-      A send B # get N
+      A send B # get 0
     =>
       < A : Service | AS >
       < B : Service | AS' >
-      A receive `FAIL
-    if
-      eq N 0 .
+      A receive 'FAIL .
 
-  crl [PUT-FAIL] :
+  rl [PUT-FAIL] :
       < A : Service | AS >
       < B : Service | AS' >
-      A send B # (put N Q)
+      A send B # (put 0 Q)
     =>
       < A : Service | AS >
       < B : Service | AS' >
-      A receive `FAIL .
-    if
-      N > 0 .
+      A receive 'FAIL .
 
-  crl [POST-FAIL] :
+  rl [POST-FAIL] :
       < A : Service | AS >
       < B : Service | AS' >
-      A send B # (post N Q)
+      A send B # (post 0 Q)
     =>
       < A : Service | AS >
       < B : Service | AS' >
-      A receive `FAIL
-    if
-      eq N 0 .
+      A receive 'FAIL .
 
-  crl [DELETE-FAIL] :
+  rl [DELETE-FAIL] :
       < A : Service | AS >
       < B : Service | AS' >
-      A send B # delete N
+      A send B # delete 0
     =>
       < A : Service | AS >
       < B : Service | AS' >
-      A receive `FAIL
-    if
-      eq N 0 .
+      A receive 'FAIL .
 endm
 
 mod SERVICE-B is
   ex SERVICE .
+
+  sorts GAME GAMESet .
+  subsorts Oid < GAME < GAMESet .
+
+  ops A B : -> Oid [ctor] .
+
+  op empty : -> GAMESet [ctor] .
+  op _;_ : GAMESet GAMESet -> GAMESet [ctor assoc comm id: empty] .
 
   op Game    :     -> Cid [ctor] .
   op id :_   : Nat -> Attribute [ctor gather (&)] .
   op name :_ : Qid -> Attribute [ctor gather (&)] .
 
   op games :_ : GAMESet -> Attribute [ctor gather(&)] .
-  op put_in_ : GAME GAMESet -> GAMESet .
+  op _in_ : Nat GAMESet -> Bool .
 
   var GS      : GAMESet .
   vars G G' S : Oid .
   var I       : Nat .
   var N N'    : Qid .
   var AS      : AttributeSet .
+
+  eq I in < G : Game | id : I , name : N > ; GS = true .
+  eq I in GS = false [owise] .
+
+  crl [GET-FAIL] :
+      < S : Service | AS >
+      < B : Service | games : GS >
+      S send B # get I
+    =>
+      < S : Service | AS >
+      < B : Service | games : GS >
+      S receive 'FAIL
+    if
+      not (I in GS) .
 
   rl [GET] :
       < G : Game | id : I , name : N >
