@@ -15,18 +15,20 @@ mod SERVICE is
   op empty : -> GAMESet [ctor] .
   op _;_ : GAMESet GAMESet -> GAMESet [ctor assoc comm id: empty] .
 
-  op Service : -> Cid [ctor] .
+  op Service : -> Cid [ctor] .  
 
-  op Game    :     -> Cid [ctor] .
-  op id :_   : Nat -> Attribute [ctor gather (&)] .
-  op name :_ : Qid -> Attribute [ctor gather (&)] .
-
-  op _send_#_ : Oid Oid Msg -> Msg [ctor] .
-  op _receive_ : Oid Msg -> Msg [ctor] .
+  **********************
+  ***CONSOLE COMMANDS***
+  **********************
   ops get_ delete_ : Nat -> Msg [ctor frozen] .
   ops put__ post__ : Nat Qid -> Msg [ctor frozen] .
-  ops put_ post_ : Oid -> Msg [ctor frozen] .
+  ops put_ post_   : Oid -> Msg [ctor frozen] .
 
+  **********************
+  ***SERVICE COMMANDS***
+  **********************
+  op _send_#_      : Oid Oid Msg -> Msg [ctor] .
+  op _receive_     : Oid Msg -> Msg [ctor] .
   ops _get_ _delete_ : Oid Nat -> Msg [ctor frozen] .
   ops _put__ _post__ : Oid Nat Qid -> Msg [ctor frozen] .
 endm
@@ -39,7 +41,7 @@ mod A-B-CONTRACT is
   var Q : Qid .
   vars AS AS' : AttributeSet .
 
-  crl [GET] :
+  crl [GET-OK] :
       < A : Service | AS >
       < B : Service | AS' >
       A send B # get N
@@ -50,7 +52,7 @@ mod A-B-CONTRACT is
     if
       N > 0 .
 
-  crl [PUT] :
+  crl [PUT-OK] :
       < A : Service | AS >
       < B : Service | AS' >
       A send B # (put N Q)
@@ -61,7 +63,7 @@ mod A-B-CONTRACT is
     if
       N > 0 .
 
-  crl [POST] :
+  crl [POST-OK] :
       < A : Service | AS >
       < B : Service | AS' >
       A send B # (post N Q)
@@ -72,7 +74,7 @@ mod A-B-CONTRACT is
     if
       N > 0 .
 
-  crl [DELETE] :
+  crl [DELETE-OK] :
       < A : Service | AS >
       < B : Service | AS' >
       A send B # delete N
@@ -82,10 +84,58 @@ mod A-B-CONTRACT is
       B receive (A delete N)
     if
       N > 0 .
+
+  crl [GET-FAIL] :
+      < A : Service | AS >
+      < B : Service | AS' >
+      A send B # get N
+    =>
+      < A : Service | AS >
+      < B : Service | AS' >
+      A receive `FAIL
+    if
+      eq N 0 .
+
+  crl [PUT-FAIL] :
+      < A : Service | AS >
+      < B : Service | AS' >
+      A send B # (put N Q)
+    =>
+      < A : Service | AS >
+      < B : Service | AS' >
+      A receive `FAIL .
+    if
+      N > 0 .
+
+  crl [POST-FAIL] :
+      < A : Service | AS >
+      < B : Service | AS' >
+      A send B # (post N Q)
+    =>
+      < A : Service | AS >
+      < B : Service | AS' >
+      A receive `FAIL
+    if
+      eq N 0 .
+
+  crl [DELETE-FAIL] :
+      < A : Service | AS >
+      < B : Service | AS' >
+      A send B # delete N
+    =>
+      < A : Service | AS >
+      < B : Service | AS' >
+      A receive `FAIL
+    if
+      eq N 0 .
 endm
 
 mod SERVICE-B is
   ex SERVICE .
+
+  op Game    :     -> Cid [ctor] .
+  op id :_   : Nat -> Attribute [ctor gather (&)] .
+  op name :_ : Qid -> Attribute [ctor gather (&)] .
 
   op games :_ : GAMESet -> Attribute [ctor gather(&)] .
   op put_in_ : GAME GAMESet -> GAMESet .
@@ -117,28 +167,16 @@ mod SERVICE-B is
       < B : Service | games : G ; GS >
       S receive 'OK .
 
-  ---(
-  rl [UPDATE] :
-      < G : Game | id : I , name : N >
-      < G' : Game | id : I , name : N' >
-      put G in (GS ; G')
-    =>
-      GS ; G .
-
-  rl [PUT-NEW] :
-      < G : Game | id : I , name : N >
-      put G in GS
-    =>
-      GS ; G .
-  )---
-
   rl [POST] :
       < G : Game | id : I , name : N >
       < S : Service | AS >
       < B : Service | games : GS >
       (S send B # (post G))
     =>
+      < G : Game | id : I , name : N >
+      < S : Service | AS >
       < B : Service | games : G ; GS > .
+      S receive 'OK .
 
   rl [DELETE] :
       < G : Game | id : I , name : N >
@@ -148,6 +186,7 @@ mod SERVICE-B is
     =>
       < S : Service | AS >
       < B : Service | games : GS > .
+      S receive 'OK .
 endm
 
 mod SERVICE-A is
