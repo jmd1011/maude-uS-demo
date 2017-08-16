@@ -3,6 +3,8 @@ mod SERVICE is
   inc QID .
   pr NAT .
 
+  ops OK FAIL : -> Msg [ctor] .
+
   sorts Key Value .
   subsort Qid < Key .
   subsorts Qid Msg < Value .
@@ -56,7 +58,7 @@ mod SERVICE-B is
       < G : Game | id : I , name : N >
       < S : Service | games : G >
       < B : Service | games : G ; GS >
-      S receive 'OK .
+      S receive OK .
 
   rl [PUT] :
       < G : Game | id : I , name : N >
@@ -66,7 +68,7 @@ mod SERVICE-B is
     =>
       < S : Service | AS >
       < B : Service | games : G ; GS >
-      S receive 'OK .
+      S receive OK .
 
   rl [POST] :
       < G : Game | id : I , name : N >
@@ -77,7 +79,7 @@ mod SERVICE-B is
       < G : Game | id : I , name : N >
       < S : Service | AS >
       < B : Service | games : G ; GS >
-      S receive 'OK .
+      S receive OK .
 
   rl [DELETE] :
       < G : Game | id : I , name : N >
@@ -87,7 +89,7 @@ mod SERVICE-B is
     =>
       < S : Service | AS >
       < B : Service | games : GS >
-      S receive 'OK .
+      S receive OK .
 endm
 
 mod SERVICE-A is
@@ -96,6 +98,7 @@ mod SERVICE-A is
   var N : Nat .
   var Q : Qid .
   var AS AS' : AttributeSet .
+  var M : Msg .
 
   rl [GET] :
       < A : Service | AS >
@@ -109,11 +112,11 @@ mod SERVICE-A is
   rl [RECEIVE] :
       < A : Service | AS >
       < B : Service | AS' >
-      A receive Q
+      A receive M
     =>
       < A : Service | AS >
       < B : Service | AS' >
-      Q .
+      M .
 
   rl [PUT] :
       < A : Service | AS >
@@ -154,14 +157,14 @@ mod A-B-CONTRACT is
   vars G G' : Oid .
   vars AS AS' : AttributeSet .
 
-  rl [GET-FAIL] :
-      < A : Service | games : empty >
-      < B : Service | games : empty >
-      A send B # get 0
-    =>
-      < A : Service | games : empty >
-      < B : Service | games : empty >
-      A receive 'FAIL .
+  rl [GET-FAIL] : 
+    < A : Service | games : empty >
+    < B : Service | games : empty >
+    A send B # get 0
+  =>
+    < A : Service | games : empty >
+    < B : Service | games : empty >
+    B send A # get 0  .
 
   rl [PUT-FAIL] :
       < A : Service | games : GS' >
@@ -170,7 +173,7 @@ mod A-B-CONTRACT is
     =>
       < A : Service | games : GS' >
       < B : Service | games : GS >
-      A receive 'FAIL .
+      A receive FAIL .
 
   rl [POST-FAIL] :
       < A : Service | games : GS' >
@@ -179,7 +182,7 @@ mod A-B-CONTRACT is
     =>
       < A : Service | games : GS' >
       < B : Service | games : GS >
-      A receive 'FAIL .
+      A receive FAIL .
 
   rl [DELETE-FAIL] :
       < A : Service | games : GS' >
@@ -188,7 +191,7 @@ mod A-B-CONTRACT is
     =>
       < A : Service | games : GS' >
       < B : Service | games : GS >
-      A receive 'FAIL .
+      A receive FAIL .
 
   crl [GET-OK] :
       < A : Service | games : GS' >
@@ -236,15 +239,123 @@ mod A-B-CONTRACT is
 endm
 
 mod TEST-SERVICE is
-  ex SERVICE-A .
-  ex SERVICE-B .
+  ---ex SERVICE-A .
+  ---ex SERVICE-B .
+  ex SERVICE .
+
+  sort Status .
+  ops stable failed : -> Status .
+  subsort Status < Msg .
 
   op initConfig : -> Configuration .
   ops G G' : -> Oid .
 
   eq initConfig =
+    stable
     < G : Game | id : 1 , name : 'Mario >
     < G' : Game | id : 2 , name : 'Mario2 >
     < A : Service | games : empty >
     < B : Service | games : (G ; G') > .
+
+  var G'' : Oid .
+  vars GS GS' : GAMESet .
+  var N : Nat .
+  var Q : Qid .
+
+  crl [GET] :
+      stable
+      < A : Service | games : GS >
+      < B : Service | games : G ; GS' >
+      < G : Game | id : N , name : Q >
+      get N
+    =>
+      stable
+      < A : Service | games : G ; GS >
+      < B : Service | games : G ; GS' >
+      < G : Game | id : N , name : Q >
+    if
+      N > 0 .
+
+  rl [GET-ZERO] :
+      stable
+      C:Configuration
+      get 0
+    =>
+      failed
+      C:Configuration .
+
+  crl [UPDATE] :
+      stable
+      < A : Service | games : GS >
+      < B : Service | games : G ; GS' >
+      < G : Game | id : N , name : Q >
+      put N Q':Qid
+    =>
+      stable
+      < A : Service | games : GS >
+      < B : Service | games : G ; GS' >
+      < G : Game | id : N , name : Q':Qid >
+    if
+      N > 0 .
+
+  rl [UPDATE-ZERO] :
+      stable
+      C:Configuration
+      put 0 Q
+    =>
+      failed
+      C:Configuration .
+
+  crl [PUT] :
+      stable
+      < A : Service | games : GS >
+      < B : Service | games : GS' >
+      < G'' : Game | id : N , name : Q >
+      put G''
+    =>
+      stable
+      < A : Service | games : GS >
+      < B : Service | games : G'' ; GS' >
+      < G'' : Game | id : N , name : Q >
+    if
+      N > 0 .
+
+  rl [PUT-ZERO] :
+      stable
+      C:Configuration
+      < G'' : Game | id : 0 , name : Q >
+      put G''
+    => 
+      failed
+      C:Configuration .
+
+  crl [DELETE] :
+      stable
+      < A : Service | games : GS >
+      < B : Service | games : G ; GS' >
+      < G : Game | id : N , name : Q >
+      delete N
+    =>
+      stable
+      < A : Service | games : GS >
+      < B : Service | games : GS' >
+    if
+      N > 0 .
+
+  rl [DELETE-ZERO] :
+      stable
+      C:Configuration
+      delete 0
+    =>
+      failed
+      C:Configuration .
+
+  rl [POST] :
+      stable
+      C:Configuration
+      post G''
+    =>
+      stable
+      C:Configuration
+      put G'' .
 endm
