@@ -32,7 +32,7 @@ mod SERVICE is
   ***SERVICE COMMANDS***
   **********************
   op _send_#_      : Oid Oid Msg -> Msg [ctor] .
-  op _receive_     : Oid Msg -> Msg [ctor] .
+  op _receive_     : Oid Msg -> Msg [ctor frozen] .
   ops _get_ _delete_ : Oid Nat -> Msg [ctor frozen] .
   ops _put__ _post__ : Oid Nat Qid -> Msg [ctor frozen] .
   ops put_ post_ : Oid -> Msg [ctor frozen] .
@@ -150,85 +150,85 @@ mod A-B-CONTRACT is
   var M : Msg .
   var N : Nat .
   var Q : Qid .
-  var GS : GAMESet .
+  var GS GS' : GAMESet .
   vars G G' : Oid .
   vars AS AS' : AttributeSet .
 
   rl [GET-FAIL] :
       < A : Service | games : empty >
-      < B : Service | games : GS >      
+      < B : Service | games : empty >
       A send B # get 0
     =>
       < A : Service | games : empty >
-      < B : Service | games : GS >
+      < B : Service | games : empty >
       A receive 'FAIL .
 
   rl [PUT-FAIL] :
-      < A : Service | games : empty >
+      < A : Service | games : GS' >
       < B : Service | games : GS >
       A send B # (put 0 Q)
     =>
-      < A : Service | games : empty >
+      < A : Service | games : GS' >
       < B : Service | games : GS >
       A receive 'FAIL .
 
   rl [POST-FAIL] :
-      < A : Service | games : empty >
+      < A : Service | games : GS' >
       < B : Service | games : GS >
       A send B # (post 0 Q)
     =>
-      < A : Service | games : empty >
+      < A : Service | games : GS' >
       < B : Service | games : GS >
       A receive 'FAIL .
 
   rl [DELETE-FAIL] :
-      < A : Service | games : empty >
+      < A : Service | games : GS' >
       < B : Service | games : GS >
       A send B # delete 0
     =>
-      < A : Service | games : empty >
+      < A : Service | games : GS' >
       < B : Service | games : GS >
       A receive 'FAIL .
 
   crl [GET-OK] :
-      < A : Service | games : empty >
+      < A : Service | games : GS' >
       < B : Service | games : GS >
       A send B # get N
     =>
-      < A : Service | games : empty >
+      < A : Service | games : GS' >
       < B : Service | games : GS >
       B receive (A get N)
     if
       N > 0 .
 
   crl [PUT-OK] :
-      < A : Service | games : empty >
+      < A : Service | games : GS' >
       < B : Service | games : GS >
       A send B # (put N Q)
     =>
-      < A : Service | games : empty >
+      < A : Service | games : GS' >
       < B : Service | games : GS >
       B receive (A put N Q)
     if
       N > 0 .
 
   crl [POST-OK] :
-      < A : Service | games : empty >
+      < A : Service | games : GS' >
       < B : Service | games : GS >
       A send B # (post N Q)
     =>
-      < A : Service | games : empty >
+      < A : Service | games : GS' >
       < B : Service | games : GS >
       B receive (A post N Q)
     if
       N > 0 .
 
   crl [DELETE-OK] :
-      < A : Service | games : empty >
+      < A : Service | games : GS' >
       < B : Service | games : GS >
       A send B # delete N
     =>
-      < A : Service | games : empty >
+      < A : Service | games : GS' >
       < B : Service | games : GS >
       B receive (A delete N)
     if
